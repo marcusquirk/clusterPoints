@@ -5,7 +5,8 @@ import java.awt.geom.AffineTransform
 import java.awt.geom.Ellipse2D
 import javax.swing.JFrame
 import javax.swing.JPanel
-import kotlin.math.pow
+import kotlin.math.*
+import kotlin.random.Random
 
 object ClusterConstants {
     const val WIDTH  = 512
@@ -67,18 +68,21 @@ fun randPoint(x1:Double, x2:Double, y1:Double, y2:Double):() -> Point{
 }
 
 // Problem 3
-fun makeClusterPointGenerator (
-    val rng: Random,
-    val Center: Point,
-    val meanDistFromCenter: Double): () -> Point {
+fun makeClusterPointGenerator (rng: Random, center: Point, distance: Double): () -> Point {
     fun clusterPointGenerator(): Point {
         val angle = 2.0*PI*rng.nextDouble()
-        val distance = meanDistFromCenter * ln(rng.nextDouble()) }
+        val distance = distance * ln(rng.nextDouble())
         val x = center.x + distance * cos(angle)
         val y = center.y + distance * sin(angle)
         return Point(x,y)
     }
     return ::clusterPointGenerator
+}
+
+fun createClusters (numberOfClusters: Int, pointsPerCluster: Int, distanceFromCenter: Double): Unit{
+    for (i in 0 until numberOfClusters){
+        createCluster(pointsPerCluster, distanceFromCenter, i)
+    }
 }
 
 fun main() {
