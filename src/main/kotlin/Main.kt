@@ -81,6 +81,19 @@ fun outerFun (
     return ::innerFun
 }
 
+class Cluster (center: Point, numPoints: Int, averageDistance: Double) {
+    val clusterID: Int = center.cluster
+    val points: MutableList<Point> = MutableList(numPoints)
+
+    init {
+        val randPointMaker = outerFun(kotlin.random.Random(System.nanoTime()), center, averageDistance)
+        for (i in 1 until numPoints) {
+            points.add(randPointMaker())
+
+        }
+    }
+}
+
 fun main() {
     println("Good morning!")
     val picture = PictureFrame(
@@ -92,4 +105,7 @@ fun main() {
     val thePoint = Point (0.0, 0.0)
     val aPoint   = Point (3.0, 4.0)
     println(thePoint.distance(aPoint))
+
+    val center: Point = randPoint(1.0, 4.0, 3.0, 8.0)()
+    val cluster = Cluster(center, 5, 2.0)
 } // main
