@@ -66,6 +66,21 @@ fun randPoint(x1:Double, x2:Double, y1:Double, y2:Double):() -> Point{
     return({-> Point((x1 +(x2-x1) * Random.nextFloat()).toDouble(), (y1 + (y2-y1) * Random.nextFloat()).toDouble())})
 }
 
+// Problem 3
+fun outerFun (
+    val rng: Random,
+    val Center: Point,
+    val meanDistFromCenter: Double): () -> Point {
+    fun innerFun(): Point {
+        val angle = 2.0*PI*rng.nextDouble()
+        val distance = meanDistFromCenter * ln(rng.nextDouble()) }
+        val x = center.x + distance * cos(angle)
+        val y = center.y + distance * sin(angle)
+        return Point(x,y)
+    }
+    return ::innerFun
+}
+
 fun main() {
     println("Good morning!")
     val picture = PictureFrame(
