@@ -20,7 +20,7 @@ data class Rectangle(
     val xMax: Double, val yMax: Double
 )
 
-class PictureCanvas( private val bounds: Rectangle, private val bg: Color) : JPanel() {
+class PictureCanvas( private val bounds: Rectangle, private val bg: Color, val listOfClusters: List<Cluster>) : JPanel() {
     init { this.background = bg }
     override fun paintComponent (g: Graphics) : Unit {
         super.paintComponent(g)
@@ -38,20 +38,26 @@ class PictureCanvas( private val bounds: Rectangle, private val bg: Color) : JPa
         transform.concatenate(translate)
         val centerX = (bounds.xMax + bounds.xMin) / 2
         val centerY = (bounds.yMax + bounds.yMin) / 2
-        val radius = minOf(bounds.xMax - bounds.xMin, bounds.yMax - bounds.yMin) / 20
-        val dot = Ellipse2D.Double(centerX - radius, centerY - radius, 2*radius, 2*radius)
+        val radius = minOf(bounds.xMax - bounds.xMin, bounds.yMax - bounds.yMin) / 300
+        var dot = Ellipse2D.Double(centerX - radius, centerY - radius, 2*radius, 2*radius)
         g2D.color = Color.RED
         g2D.fill(transform.createTransformedShape(dot))
+        for (i in listOfClusters){
+            for (j in i.points){
+                dot = Ellipse2D.Double(j.x, j.y, 2*radius, 2*radius)
+                g2D.fill(transform.createTransformedShape(dot))
+            }
+        }
     } // paintComponent()
     override fun repaint() {}
 } // PictureCanvas
 
-class PictureFrame(private val w: Int, private val h: Int, private val bg: Color, title: String) : JFrame(title) {
+class PictureFrame(private val w: Int, private val h: Int, private val bg: Color, title: String, listOfClusters: List<Cluster>) : JFrame(title) {
     init {
         this.setSize(w,h)
         this.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         val bounds = Rectangle(-1.0, -1.0, 1.0, 1.0)
-        val panel = PictureCanvas(bounds, bg)
+        val panel = PictureCanvas(bounds, bg, listOfClusters)
         this.contentPane = panel
         this.isVisible = true
     } // init
@@ -79,12 +85,14 @@ fun makeClusterPointGenerator (rng: Random, center: Point, distance: Double, id:
     return ::clusterPointGenerator
 }
 
-fun createClusters (numberOfClusters: Int, pointsPerCluster: Int, distanceFromCenter: Double): Unit{
-    val randPointMaker = randPoint(-0.5, -0.5, 0.5, 0.5)
+fun createClusters (numberOfClusters: Int, pointsPerCluster: Int, distanceFromCenter: Double): List<Cluster>{
+    var listOfClusters: MutableList<Cluster> = mutableListOf<Cluster>()
+    val randPointMaker = randPoint(-.8, .8, -.8, .8)
     for (i in 0 until numberOfClusters){
-        var point = makeClusterPointGenerator(Random(System.nanoTime()), randPointMaker(), 0.4, i)()
-        Cluster(point, pointsPerCluster, distanceFromCenter)
+        var point = makeClusterPointGenerator(Random(System.nanoTime()), randPointMaker(), distanceFromCenter, i)()
+        listOfClusters.add(Cluster(point, pointsPerCluster, distanceFromCenter))
     }
+    return listOfClusters
 }
 
 class Cluster (center: Point, numPoints: Int, averageDistance: Double) {
@@ -103,11 +111,13 @@ class Cluster (center: Point, numPoints: Int, averageDistance: Double) {
 
 fun main() {
     println("Good morning!")
+    val listOfPoints = createClusters( 5, 1000, 0.15)
     val picture = PictureFrame(
         ClusterConstants.WIDTH,
         ClusterConstants.HEIGHT,
         ClusterConstants.BG_COLOUR,
-        ClusterConstants.TITLE
+        ClusterConstants.TITLE,
+        listOfPoints
     )
     val thePoint = Point (0.0, 0.0)
     val aPoint   = Point (3.0, 4.0)
