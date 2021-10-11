@@ -62,6 +62,10 @@ class Point(val x: Double, val y: Double, var cluster: Int = -1){
     }
 }
 
+fun randPoint(x1:Double, x2:Double, y1:Double, y2:Double):() -> Point{
+    return({-> Point((x1 +(x2-x1) * Random.nextFloat()).toDouble(), (y1 + (y2-y1) * Random.nextFloat()).toDouble())})
+}
+
 fun main() {
     println("Good morning!")
     val picture = PictureFrame(
