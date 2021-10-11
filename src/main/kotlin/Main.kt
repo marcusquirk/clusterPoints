@@ -50,10 +50,10 @@ class PictureFrame(private val w: Int, private val h: Int, private val bg: Color
     init {
         this.setSize(w,h)
         this.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        this.isVisible = true
         val bounds = Rectangle(-1.0, -1.0, 1.0, 1.0)
         val panel = PictureCanvas(bounds, bg)
         this.contentPane = panel
+        this.isVisible = true
     } // init
 } //pictureFrame
 
@@ -68,29 +68,32 @@ fun randPoint(x1:Double, x2:Double, y1:Double, y2:Double):() -> Point{
 }
 
 // Problem 3
-fun makeClusterPointGenerator (rng: Random, center: Point, distance: Double): () -> Point {
+fun makeClusterPointGenerator (rng: Random, center: Point, distance: Double, id:Int): () -> Point {
     fun clusterPointGenerator(): Point {
         val angle = 2.0*PI*rng.nextDouble()
         val distance = distance * ln(rng.nextDouble())
         val x = center.x + distance * cos(angle)
         val y = center.y + distance * sin(angle)
-        return Point(x,y)
+        return Point(x,y,id)
     }
     return ::clusterPointGenerator
 }
 
 fun createClusters (numberOfClusters: Int, pointsPerCluster: Int, distanceFromCenter: Double): Unit{
+    val randPointMaker = randPoint(-0.5, -0.5, 0.5, 0.5)
     for (i in 0 until numberOfClusters){
-        createCluster(pointsPerCluster, distanceFromCenter, i)
+        var point = makeClusterPointGenerator(Random(System.nanoTime()), randPointMaker(), 0.4, i)()
+        Cluster(point, pointsPerCluster, distanceFromCenter)
     }
 }
 
 class Cluster (center: Point, numPoints: Int, averageDistance: Double) {
     val clusterID: Int = center.cluster
-    val points: MutableList<Point> = MutableList(numPoints)
+    val points: MutableList<Point> = mutableListOf<Point>()
 
     init {
-        val randPointMaker = outerFun(kotlin.random.Random(System.nanoTime()), center, averageDistance)
+        val randPointMaker = makeClusterPointGenerator(Random(System.nanoTime()),
+            center, averageDistance, clusterID)
         for (i in 1 until numPoints) {
             points.add(randPointMaker())
 
@@ -112,4 +115,7 @@ fun main() {
 
     val center: Point = randPoint(1.0, 4.0, 3.0, 8.0)()
     val cluster = Cluster(center, 5, 2.0)
+
+
+
 } // main
